@@ -1,0 +1,35 @@
+#lang racket
+
+(define-struct tree (height girth age leaf-shape leaf-color) #:inspector #f)
+
+(define coconut (tree 12 21 1220 'shape 'red))
+
+(define-struct table (equ l) #:inspector #f)
+
+(define cmp
+  (lambda(x y)
+    (eq? x y)
+  )
+)
+
+
+(define _map (table cmp '((1 2) (2 3))))
+
+ 
+(define table-get
+  (lambda (_table _key)
+    (let ((isEqual #t))
+    (if (eq? isEqual ((table-equ _map) (car (car _table)) _key))
+        (cdr (car _table))
+        (begin
+          (if (pair? (cdr _table))
+            (table-get (cdr _table) _key)
+            null
+          )
+        )
+        )
+    )
+    )
+  )
+
+(table-get (table-l _map) 3)

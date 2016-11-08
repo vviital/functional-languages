@@ -1,0 +1,100 @@
+#lang racket
+
+(require readline)
+(require readline/rep-start)
+(require readline/readline)
+(require syntax/parse)
+
+(define isAtom
+  (lambda (x)
+    (and (not (null? x)) (not (pair? x)) (not (list? x)) (not (syntax? x)))
+  )
+)
+
+(define isntAtom
+  (lambda (x)
+    (not (isAtom x))
+  )
+)
+
+;(define getItemsBySelector
+; (lambda (x sel)
+;    (let ((head (car x)) (tail (cdr x))) 
+;      (if (sel head)
+;          (begin
+;            (if (not (null? tail))
+;              (append (list head) (getItemsBySelector tail sel))
+;              (list head)
+;            )
+;          )
+;          (begin
+;            (if (not (null? tail))
+;               (getItemsBySelector tail sel)
+;               '() 
+;            )
+;          )
+;      )
+;   )
+;  )
+;)
+
+(define getItemsBySelector
+ (lambda (x sel)
+   (if (null? x)
+      '()
+      (begin
+        (let ((head (car x)) (tail (cdr x))) 
+          (if (sel head)
+             (append (list head) (getItemsBySelector tail sel))
+             (getItemsBySelector tail sel)
+          )
+      )
+      )
+   ) 
+  )
+)
+
+(define-struct point (x y))
+
+(define val '(1 2 (3 4) 5 (point 1 2)))
+
+(define separate
+  (lambda (x)
+    (append (getItemsBySelector x isAtom) (getItemsBySelector x isntAtom))
+  )
+)
+
+;(separate (string->list (read-line)))
+
+(define parse
+  (lambda (x)
+    (if (isAtom (syntax-e x))
+      (syntax-e x)
+    (begin
+      (if (and (pair? (syntax-e x)) (not (list? (syntax-e x))))
+        (begin
+          (let ((head (car (syntax-e x))) (tail (cdr (syntax-e x))))
+            (cons (parse head) (parse tail))
+          )
+        )
+        (begin
+          (map (lambda (value)
+                 (if (or (list? (syntax-e value)) (pair? (syntax-e value)))
+                     (parse value)
+                     (syntax-e value))
+                 ) (syntax->list x))
+        )
+      )
+    )
+    )
+  )
+)
+
+;(parse (read-syntax))
+(separate (parse (read-syntax)))
+
+(define ttt '(1 2 (3 . 4) 1 2 5 (1 2 3) (4 . 5) (2 4 (1 . 2))))
+;(separate ttt)
+;(map syntax-e (syntax->list (read-syntax)))
+;'(1 2 (3 4) (point 3 4) 4 5 (ttt 2 3 4))
+
