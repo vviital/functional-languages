@@ -1,0 +1,48 @@
+#lang racket
+
+(require readline)
+(require readline/rep-start)
+(require readline/readline)
+(require (lib "defmacro.ss"))
+(require scheme/base)
+
+(define isAtom
+  (lambda (x)
+    (and (not (null? x)) (not (pair? x)) (not (list? x)) (not (syntax? x)))
+  )
+)
+
+(define isntAtom
+  (lambda (x)
+    (not (isAtom x))
+  )
+)
+
+(define getItemsBySelector
+ (lambda (x sel)
+   (if (null? x)
+      '()
+      (begin
+        (let ((head (car x)) (tail (cdr x))) 
+          (if (sel head)
+             (append (list head) (getItemsBySelector tail sel))
+             (getItemsBySelector tail sel)
+          )
+      )
+      )
+   ) 
+  )
+)
+
+(define-macro merge-macro
+  (lambda (list1 . list2)
+    `(append ,list1 ,@list2)
+  )
+)
+;(separate (syntax->datum (read-syntax)))
+
+(define _list '(1 2 3 (1 . 2)))
+(getItemsBySelector _list isAtom)
+(getItemsBySelector _list isntAtom)
+(merge-macro (getItemsBySelector _list isAtom) (getItemsBySelector _list isntAtom))
+;(merge-macro (getItemsBySelector _list isAtom) (getItemsBySelector _list isntAtom))
