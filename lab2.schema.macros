@@ -35,14 +35,13 @@
 )
 
 (define-macro merge-macro
-  (lambda (list1 . list2)
-    `(append ,list1 ,@list2)
+  (lambda (synt . other)
+    (let ((func (list-ref other 0)) (cmp1 (list-ref other 1)) (cmp2 (list-ref other 2)))
+      `(let ((array  (syntax->datum ,synt)))
+         (append (,func array ,cmp1) (,func array ,cmp2))
+       )
+    )
   )
 )
-;(separate (syntax->datum (read-syntax)))
 
-(define _list '(1 2 3 (1 . 2)))
-(getItemsBySelector _list isAtom)
-(getItemsBySelector _list isntAtom)
-(merge-macro (getItemsBySelector _list isAtom) (getItemsBySelector _list isntAtom))
-;(merge-macro (getItemsBySelector _list isAtom) (getItemsBySelector _list isntAtom))
+(merge-macro (read-syntax) getItemsBySelector isAtom isntAtom)
